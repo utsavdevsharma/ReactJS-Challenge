@@ -11,7 +11,9 @@ import { getTransactions } from 'selectors/transactions';
 import { getCategories } from 'selectors/categories';
 
 import type { Transaction } from 'modules/transactions';
-
+import formatAmount from 'utils/formatAmount';
+import BudgetGridRowStyles from 'components/BudgetGridRow/style.scss';
+import BudgetGridStyles from 'containers/BudgetGrid/style.scss'
 
 // inject reducers that might not have been originally there
 injectAsyncReducers({
@@ -40,7 +42,7 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
     return (
       <div>
 
-        <Link to="/budget">&lt; back to transactions</Link>
+        <Link to="/budget">&lt; back to all transactions</Link>
 
         {this.state.transaction ? (
           this.renderDetails()
@@ -53,36 +55,47 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
   }
 
   renderDetails() {
+    const transaction = this.state.transaction,
+      amount = formatAmount(transaction.value),
+      amountCls = amount.isNegative ? BudgetGridRowStyles.neg : BudgetGridRowStyles.pos;
+
     return (
-      <table>
-        <tbody>
-          <tr>
-            <td>Item: </td>
-            <td>{this.state.transaction.id}</td>
-          </tr>
+      <div>
+        <h1>{transaction.description}</h1>
+        <h2 className={amountCls}>%</h2>
 
-          <tr>
-            <td>Description: </td>
-            <td>{this.state.transaction.description}</td>
-          </tr>
+        <table className={BudgetGridStyles.budgetGrid}>
+          <tbody>
+            <tr>
+              <td>Item: </td>
+              <td>{transaction.id}</td>
+            </tr>
 
-          <tr>
-            <td>Category: </td>
-            <td>{this.state.transaction.categoryId}</td>
-          </tr>
+            <tr>
+              <td>Description: </td>
+              <td>{transaction.description}</td>
+            </tr>
 
-          <tr>
-            <td>Amount: </td>
-            <td>{this.state.transaction.value}</td>
-          </tr>
+            <tr>
+              <td>Category: </td>
+              <td>{transaction.categoryId}</td>
+            </tr>
 
-          <tr>
-            <td>Percentage of total budget: </td>
-            <td>%</td>
-          </tr>
+            <tr>
+              <td>Amount: </td>
+              <td className={amountCls}>
+                <span className={BudgetGridRowStyles.cellContent}>{amount.text}</span>
+              </td>
+            </tr>
 
-        </tbody>
-      </table>
+            <tr>
+              <td>Percentage of total budget: </td>
+              <td className={amountCls}>%</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
     )
   }
 
