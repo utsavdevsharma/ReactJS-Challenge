@@ -9,7 +9,11 @@ import transactionReducer from 'modules/transactions';
 import categoryReducer from 'modules/categories';
 import { injectAsyncReducers } from 'store';
 
-import { getTransactions } from 'selectors/transactions';
+import {
+  getTransactions,
+  getInflowBalance,
+  getOutflowBalance,
+} from 'selectors/transactions';
 import { getCategories } from 'selectors/categories';
 
 import type { Transaction } from 'modules/transactions';
@@ -108,14 +112,37 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
   }
 
   renderPieChart() {
-    const transaction = this.state.transaction;
-    if(transaction.value<0) {
-      transaction.value = transaction.value*-1;
+    const transaction = Object.assign({}, this.state.transaction),
+      chartData = new Array();
+    let percent = 0;
+
+    if( transaction.value<0 ) {
+      percent = transaction.value / this.props.totals.outflow * 100 * -1;
+
+      transaction.value = percent;
+
+      chartData.push({
+        id: 0,
+        value: 100 - percent,
+        description: "Rest outflow",
+      });
+    } else {
+      percent = transaction.value / this.props.totals.inflow * 100 ;
+
+      transaction.value = percent;
+
+      chartData.push({
+        id: 0,
+        value: 100 - percent,
+        description: "Rest inflow",
+      });
     }
+
+    chartData.unshift(transaction);
 
     return (
       <DonutChart
-        data={[transaction]}
+        data={chartData}
         dataLabel="description" dataKey="id"
         innerRatio={0}
         // zero innerRadius makes donut chart look like pie chart
@@ -130,6 +157,10 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
 const mapStateToProps = state => ({
   transactions: getTransactions(state),
   categories: getCategories(state),
+  totals: {
+    inflow: getInflowBalance(state),
+    outflow: Math.abs(getOutflowBalance(state)),
+  },
 });
 
 export default connect(mapStateToProps)(TransactionDetails);
