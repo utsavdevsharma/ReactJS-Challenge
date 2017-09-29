@@ -45,8 +45,11 @@ class DonutChart extends React.Component<DonutChartProps> {
 
   getPathArc = () => {
     const { height, innerRatio } = this.props;
+    const calculatedInnerRadius = innerRatio===0 ? innerRatio : (height / innerRatio);
+    // zero innerRadius makes donut chart look like pie chart
+
     return arc()
-      .innerRadius(height / innerRatio)
+      .innerRadius( calculatedInnerRadius )
       .outerRadius(height / 2);
   };
 

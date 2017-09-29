@@ -16,7 +16,9 @@ import type { Transaction } from 'modules/transactions';
 import formatAmount from 'utils/formatAmount';
 import styles from './style.scss'
 import BudgetGridRowStyles from 'components/BudgetGridRow/style.scss';
-import BudgetGridStyles from 'containers/BudgetGrid/style.scss'
+import BudgetGridStyles from 'containers/BudgetGrid/style.scss';
+
+import DonutChart from 'components/DonutChart';
 
 // inject reducers that might not have been originally there
 injectAsyncReducers({
@@ -48,7 +50,10 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
         <Link to={`/${permalinks.budget}`} className={styles.backButton} >&lt; back to all transactions</Link>
 
         {this.state.transaction ? (
-          this.renderDetails()
+          <div className={styles.clearfix}>
+            <div className={styles.leftCol}>{this.renderDetails()}</div>
+            <div className={styles.rightCol}>{this.renderPieChart()}</div>
+          </div>
         ) : (
           <h4>Transaction not found.</h4>
         )}
@@ -99,7 +104,24 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
           </tbody>
         </table>
       </div>
-    )
+    );
+  }
+
+  renderPieChart() {
+    const transaction = this.state.transaction;
+    if(transaction.value<0) {
+      transaction.value = transaction.value*-1;
+    }
+
+    return (
+      <DonutChart
+        data={[transaction]}
+        dataLabel="description" dataKey="id"
+        innerRatio={0}
+        // zero innerRadius makes donut chart look like pie chart
+
+        height={200} />
+    );
   }
 
 
