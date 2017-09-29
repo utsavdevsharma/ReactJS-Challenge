@@ -1,15 +1,39 @@
 // @flow
 import * as React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
-import { defaultTransactions } from '../../modules/defaults';
+import transactionReducer from 'modules/transactions';
+import categoryReducer from 'modules/categories';
+import { injectAsyncReducers } from 'store';
+
+import { getTransactions } from 'selectors/transactions';
+import { getCategories } from 'selectors/categories';
+
+import type { Transaction } from 'modules/transactions';
 
 
-class TransactionDetails extends React.Component<> {
+// inject reducers that might not have been originally there
+injectAsyncReducers({
+  transactions: transactionReducer,
+  categories: categoryReducer,
+});
+
+
+type TransactionDetailsProps = {
+  transactions: Transaction[],
+  categories: Object,
+};
+
+class TransactionDetails extends React.Component<TransactionDetailsProps> {
+  static defaultProps = {
+    transactions: [],
+    categories: {},
+  };
 
   state = {
     TransactionID: this.props.params.id,
-    transaction: defaultTransactions.find( item => item.id === parseInt(this.props.params.id) ),
+    transaction: this.props.transactions.find( item => item.id === parseInt(this.props.params.id) ),
   }
 
   render() {
@@ -65,4 +89,9 @@ class TransactionDetails extends React.Component<> {
 
 }
 
-export default TransactionDetails;
+const mapStateToProps = state => ({
+  transactions: getTransactions(state),
+  categories: getCategories(state),
+});
+
+export default connect(mapStateToProps)(TransactionDetails);
