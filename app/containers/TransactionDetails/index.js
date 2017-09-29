@@ -14,6 +14,7 @@ import { getCategories } from 'selectors/categories';
 
 import type { Transaction } from 'modules/transactions';
 import formatAmount from 'utils/formatAmount';
+import styles from './style.scss'
 import BudgetGridRowStyles from 'components/BudgetGridRow/style.scss';
 import BudgetGridStyles from 'containers/BudgetGrid/style.scss'
 
@@ -44,7 +45,7 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
     return (
       <div>
 
-        <Link to={`/${permalinks.budget}`} >&lt; back to all transactions</Link>
+        <Link to={`/${permalinks.budget}`} className={styles.backButton} >&lt; back to all transactions</Link>
 
         {this.state.transaction ? (
           this.renderDetails()
