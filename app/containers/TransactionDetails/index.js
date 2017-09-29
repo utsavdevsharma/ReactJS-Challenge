@@ -3,6 +3,8 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 
+import permalinks from 'routes/permalinks';
+
 import transactionReducer from 'modules/transactions';
 import categoryReducer from 'modules/categories';
 import { injectAsyncReducers } from 'store';
@@ -42,7 +44,7 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
     return (
       <div>
 
-        <Link to="/budget">&lt; back to all transactions</Link>
+        <Link to={`/${permalinks.budget}`} >&lt; back to all transactions</Link>
 
         {this.state.transaction ? (
           this.renderDetails()
