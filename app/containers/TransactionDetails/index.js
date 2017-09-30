@@ -112,9 +112,10 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
   }
 
   renderPieChart() {
-    const transaction = Object.assign({}, this.state.transaction),
-      chartData = new Array();
-    let percent = 0;
+    const transaction = Object.assign({}, this.state.transaction);
+
+    let chartData = new Array(),
+      percent = 0;
 
     if( transaction.value<0 ) {
       percent = transaction.value / this.props.totals.outflow * 100 * -1;
@@ -147,7 +148,8 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
         innerRatio={0}
         // zero innerRadius makes donut chart look like pie chart
 
-        height={200} />
+        height={200}
+        format="percentage" />
     );
   }
 

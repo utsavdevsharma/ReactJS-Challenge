@@ -5,12 +5,21 @@ export type FormattedAmount = {
   isNegative: boolean,
 };
 
-export default function formatAmount(amount: number, showSign: boolean = true): FormattedAmount {
+export default function formatAmount(amount: number, showSign: boolean = true, format = null): FormattedAmount {
   const isNegative = amount < 0;
-  const formatValue = Math.abs(amount).toLocaleString('en-us', {
-    style: 'currency',
-    currency: 'USD',
-  });
+  let formatValue;
+
+  if ( format === "percentage" ) {
+    let valueForFormat = amount / 100;
+    formatValue = Math.abs(valueForFormat).toLocaleString('en-us', {
+      style: 'percent',
+    });
+  } else {
+    formatValue = Math.abs(amount).toLocaleString('en-us', {
+      style: 'currency',
+      currency: 'USD',
+    });
+  }
 
   return {
     text: `${isNegative && showSign ? '-' : ''}${formatValue}`,
