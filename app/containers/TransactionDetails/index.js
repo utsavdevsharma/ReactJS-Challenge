@@ -6,7 +6,6 @@ import { Link } from 'react-router-dom';
 import permalinks from 'routes/permalinks';
 
 import transactionReducer from 'modules/transactions';
-import categoryReducer from 'modules/categories';
 import { injectAsyncReducers } from 'store';
 
 import {
@@ -14,7 +13,6 @@ import {
   getInflowBalance,
   getOutflowBalance,
 } from 'selectors/transactions';
-import { getCategories } from 'selectors/categories';
 
 import type { Transaction } from 'modules/transactions';
 import formatAmount from 'utils/formatAmount';
@@ -27,24 +25,60 @@ import DonutChart from 'components/DonutChart';
 // inject reducers that might not have been originally there
 injectAsyncReducers({
   transactions: transactionReducer,
-  categories: categoryReducer,
 });
 
 
 type TransactionDetailsProps = {
   transactions: Transaction[],
-  categories: Object,
 };
 
 class TransactionDetails extends React.Component<TransactionDetailsProps> {
   static defaultProps = {
     transactions: [],
-    categories: {},
   };
 
   state = {
     TransactionID: this.props.params.id,
     transaction: this.props.transactions.find( item => item.id === parseInt(this.props.params.id) ),
+  }
+
+  componentWillMount() {
+    const transaction = this.state.transaction,
+      amount = formatAmount(transaction.value),
+      t = Object.assign({}, this.state.transaction);
+
+    let chartData = new Array(),
+      percent = 0;
+
+    this.state.amount = amount;
+    this.state.amountCls = amount.isNegative ? BudgetGridRowStyles.neg : BudgetGridRowStyles.pos;
+
+    if( amount.isNegative ) {
+      percent = t.value / this.props.totals.outflow * 100;
+
+      t.percentWithSign = percent;
+      t.value = percent * -1;
+
+      chartData.push({
+        id: 0,
+        value: 100 + percent,
+        description: "Rest outflow",
+      });
+    } else {
+      percent = t.value / this.props.totals.inflow * 100 ;
+
+      t.percentWithSign = percent;
+      t.value = percent;
+
+      chartData.push({
+        id: 0,
+        value: 100 - percent,
+        description: "Rest inflow",
+      });
+    }
+    chartData.unshift(t);
+
+    this.state.chartData = chartData;
   }
 
   render() {
@@ -67,14 +101,13 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
   }
 
   renderDetails() {
-    const transaction = this.state.transaction,
-      amount = formatAmount(transaction.value),
-      amountCls = amount.isNegative ? BudgetGridRowStyles.neg : BudgetGridRowStyles.pos;
+    const { transaction, amount, amountCls, chartData } = this.state,
+      formattedAmount = formatAmount(chartData[0].percentWithSign, true, "percentage").text;
 
     return (
       <div>
         <h1>{transaction.description}</h1>
-        <h2 className={amountCls}>%</h2>
+        <h2 className={amountCls}>{formattedAmount}</h2>
 
         <table className={BudgetGridStyles.budgetGrid}>
           <tbody>
@@ -89,11 +122,6 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
             </tr>
 
             <tr>
-              <td>Category: </td>
-              <td>{transaction.categoryId}</td>
-            </tr>
-
-            <tr>
               <td>Amount: </td>
               <td className={amountCls}>
                 <span className={BudgetGridRowStyles.cellContent}>{amount.text}</span>
@@ -101,8 +129,8 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
             </tr>
 
             <tr>
-              <td>Percentage of total budget: </td>
-              <td className={amountCls}>%</td>
+              <td>Percentage of budget: </td>
+              <td className={amountCls}>{formattedAmount}</td>
             </tr>
 
           </tbody>
@@ -112,34 +140,7 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
   }
 
   renderPieChart() {
-    const transaction = Object.assign({}, this.state.transaction);
-
-    let chartData = new Array(),
-      percent = 0;
-
-    if( transaction.value<0 ) {
-      percent = transaction.value / this.props.totals.outflow * 100 * -1;
-
-      transaction.value = percent;
-
-      chartData.push({
-        id: 0,
-        value: 100 - percent,
-        description: "Rest outflow",
-      });
-    } else {
-      percent = transaction.value / this.props.totals.inflow * 100 ;
-
-      transaction.value = percent;
-
-      chartData.push({
-        id: 0,
-        value: 100 - percent,
-        description: "Rest inflow",
-      });
-    }
-
-    chartData.unshift(transaction);
+    const { chartData } = this.state ;
 
     return (
       <DonutChart
@@ -158,7 +159,6 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
 
 const mapStateToProps = state => ({
   transactions: getTransactions(state),
-  categories: getCategories(state),
   totals: {
     inflow: getInflowBalance(state),
     outflow: Math.abs(getOutflowBalance(state)),
