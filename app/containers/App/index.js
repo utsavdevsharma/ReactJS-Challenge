@@ -7,7 +7,10 @@ import AppError from 'components/AppError';
 import Header from 'components/Header';
 import Budget from 'routes/Budget';
 import Reports from 'routes/Reports';
+import Transaction from 'routes/Transaction';
 import './style.scss';
+
+import permalinks from 'routes/permalinks';
 
 const App = () => (
   <ErrorBoundary fallbackComponent={AppError}>
@@ -15,9 +18,10 @@ const App = () => (
       <Header />
 
       <Switch>
-        <Route path="/budget" component={Budget} />
+        <Route path={`/${permalinks.budget}`} component={Budget} />
         <Route path="/reports" component={Reports} />
-        <Redirect to="/budget" />
+        <Route path="/transaction/:id" component={Transaction} />
+        <Redirect to={`/${permalinks.budget}`} />
       </Switch>
     </main>
   </ErrorBoundary>

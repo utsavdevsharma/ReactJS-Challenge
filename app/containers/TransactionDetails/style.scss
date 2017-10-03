@@ -1,0 +1,36 @@
+@import 'theme/variables';
+
+.backButton {
+  text-decoration: none;
+  color: $gray;
+  padding: 6px 8px 8px;
+  border: 1px solid;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 20px;
+  &:hover {
+    color: black;
+  }
+}
+
+.clearfix {
+  &:before,&:after {
+    content: " "; // 1
+    display: table; // 2
+  }
+
+  &:after {
+    clear: both;
+  }
+}
+
+.leftCol {
+  float: left;
+  width: 50%;
+}
+
+.rightCol {
+  float: left;
+  width: 50%;
+}
+
