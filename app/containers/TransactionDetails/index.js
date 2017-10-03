@@ -43,8 +43,13 @@ class TransactionDetails extends React.Component<TransactionDetailsProps> {
   }
 
   componentWillMount() {
-    const transaction = this.state.transaction,
-      amount = formatAmount(transaction.value),
+    const transaction = this.state.transaction;
+
+    if (!transaction) {
+      return;
+    }
+
+    const amount = formatAmount(transaction.value),
       t = Object.assign({}, this.state.transaction);
 
     let chartData = new Array(),
